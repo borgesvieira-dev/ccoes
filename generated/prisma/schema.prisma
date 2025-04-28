@@ -1,0 +1,65 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Municipio {
+  id             Int        @id @default(autoincrement())
+  nome           String
+  img            String?
+  uf             String     @default("ES")
+  aprovados      Int        @default(0)
+  protocolados   Int        @default(0)
+  destaque       Boolean    @default(false)
+  sitePrefeitura String?
+  siteCamara     String?
+  vereadores     Vereador[] // relação 1:N
+  leads          Lead[] // relação 1:N
+}
+
+model Vereador {
+  id           Int       @id @default(autoincrement())
+  nome         String
+  whatsapp     String?
+  email        String?
+  partido      String?
+  fotoUrl      String?
+  destaque     Boolean   @default(false)
+  aprovacoes   Int       @default(0)
+  protocolados Int       @default(0)
+  municipioId  Int
+  municipio    Municipio @relation(fields: [municipioId], references: [id])
+}
+
+model Lead {
+  id           Int       @id @default(autoincrement())
+  nome         String
+  email        String
+  bairro       String?
+  whatsapp     String?
+  type         String    @default("lead")
+  dataCadastro DateTime  @default(now())
+  ativo        Boolean   @default(true)
+  municipioId  Int
+  municipio    Municipio @relation(fields: [municipioId], references: [id])
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  nome         String
+  email        String   @unique
+  senha        String // armazenar hash da senha
+  dataCadastro DateTime @default(now())
+  ativo        Boolean  @default(true)
+}
